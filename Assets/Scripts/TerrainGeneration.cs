@@ -131,7 +131,7 @@ public class TerrainGeneration : MonoBehaviour
                     float zCoord = (float)(y + worldOffsetZ) / (length - 1) * scale * freq + offset.y;
 
                     //noiseValue += (Unity.Mathematics.noise.snoise( new Unity.Mathematics.float2(xCoord, zCoord)) - 0.5f) * amp;
-                    noiseValue += (SimplexNoise.Noise(xCoord, zCoord) - 0.5f) * amp;
+                    noiseValue += (SimplexNoise.Noise(xCoord, zCoord).x - 0.5f) * amp;
 
 
                     maxAmp += amp;

@@ -59,7 +59,7 @@ public class LSystemDrawer : MonoBehaviour
         lSystemString = creator.lSystem(axioms, rules, iterations);
 
         Draw();
-        CorrectTiles();
+        //CorrectTiles();
 
     }
 
@@ -143,6 +143,7 @@ public class LSystemDrawer : MonoBehaviour
                 {
                     obj = Instantiate(roadVertical, worldPos, Quaternion.identity);
                 }
+                obj.transform.SetParent(this.gameObject.transform);
                 placedRoadObjects.Add(cell, obj);
                 drawnCells.Add(cell);
             }
