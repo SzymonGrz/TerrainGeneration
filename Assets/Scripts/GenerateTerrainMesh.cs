@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Unity.Mathematics;
-using UnityEngine.UIElements;
+
 
 public class GenerateTerrainMesh : MonoBehaviour
 {
@@ -36,11 +34,13 @@ public class GenerateTerrainMesh : MonoBehaviour
         voronoi,
         none,
     }
-    enum NoiseModificator
-    {
-        domain_warping,
-        none,
-    }
+    //enum NoiseModificator
+    //{
+    //    domain_warping,
+    //    turbulence,
+    //    none,
+    //}
+
     enum DerivativeModificator
     {
         derivative_simplex,
@@ -48,14 +48,25 @@ public class GenerateTerrainMesh : MonoBehaviour
     }
 
     [SerializeField] private NoiseType noiseType = NoiseType.perlin;
-    [SerializeField] private NoiseModificator noiseModificator = NoiseModificator.none;
+
+    [SerializeField] private bool domainWarping = false;
+    [SerializeField] private bool turbulence = false;
+
+    //[SerializeField] private NoiseModificator noiseModificator = NoiseModificator.none;
     [SerializeField] private DerivativeModificator derivativeModificator = DerivativeModificator.none;
+    [SerializeField] private float derivativeMultiplication = 150;
 
     [SerializeField][Range(-1, 1)] private float sharpness;
 
     [Header("Domain Warping")]
     [SerializeField] private float[] warpingImpact;
     [SerializeField] private float[] warpValues = new float[] { 0, 0, 5.2f, 1.3f, 1.7f, 9.2f, 8.3f, 2.8f };
+
+    [Header("Experimental")]
+    [SerializeField][Range(0, 1)] private float interpolation;
+    [SerializeField] private bool isTerrace = false;
+
+    private Vector2 center;
 
     bool terrainGenerated = false;
 
@@ -76,8 +87,15 @@ public class GenerateTerrainMesh : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.uv = uv.ToArray();
         mesh.triangles = triangles.ToArray();
+
+        Vector3 t = this.gameObject.transform.position;
+        center = new Vector2(t.x + 500f, t.z + 500f);
+
         GenerateTerrain();
         mesh.RecalculateNormals();
+
+        //Debug.Log(mesh.triangles.Length);
+
     }
 
     public void GenerateTerrain()
@@ -158,7 +176,22 @@ public class GenerateTerrainMesh : MonoBehaviour
 
             noiseValue = PerlinNoise(freq, amp, vertex);
 
-            if (noiseModificator == NoiseModificator.domain_warping)
+            //----------------------------
+            //test area        
+
+            //noiseValue = Mathf.Max(PerlinNoise(freq, amp, vertex), SimplexNoise(freq, amp, vertex));
+            //noiseValue = Mathf.Lerp(noiseValue, SimplexNoise(freq, amp, vertex), Mathf.Max(0f, interpolation));
+            //noiseValue = Mathf.SmoothStep(PerlinNoise(freq, amp, vertex), SimplexNoise(freq, amp, vertex), Mathf.Max(0f, interpolation));
+
+            //noiseValue = Mathf.Lerp(noiseValue, VoronoiNoise(freq, amp, vertex), Mathf.Max(0f, interpolation));
+            //noiseValue = noiseValue * VoronoiNoise(freq, amp, vertex);
+            //noiseValue = 0.65f*noiseValue + 0.35f*VoronoiNoise(freq, amp, vertex);
+
+            noiseValue = 0.65f * noiseValue + 0.35f * ValueNoise(freq, amp, vertex);
+
+            //----------------------------
+
+            if (domainWarping)
             {
                 Vector2 warpedCoords1 = new Vector2(PerlinNoise(freq, amp, vertex + new Vector2(warpValues[0], warpValues[1])),
                 PerlinNoise(freq, amp, vertex + new Vector2(warpValues[2], warpValues[3])));
@@ -174,30 +207,115 @@ public class GenerateTerrainMesh : MonoBehaviour
             vertices[i] = new Vector3(vertices[i].x, vertices[i].y + 0.5f + noiseValue * heightMultiplier, vertices[i].z);
 
         }
+
+        //----------------------------------------
+
+        if (isTerrace)
+        {
+
+            float minNoise = float.MaxValue;
+            float maxNoise = float.MinValue;
+
+            foreach (var vertex in vertices)
+            {
+                if (vertex.y < minNoise) minNoise = vertex.y;
+                if (vertex.y > maxNoise) maxNoise = vertex.y;
+            }
+
+            for (int j = 0; j < vertices.Count; j++)
+            {
+                float noiseValue = vertices[j].y;
+                int steps = 20;
+                float normalizedNoise = (noiseValue - minNoise) / (maxNoise - minNoise);
+
+
+                float terraced = Mathf.Floor(normalizedNoise * steps) / steps;
+
+                float finalY = Mathf.Lerp(minNoise, maxNoise, terraced);
+
+                vertices[j] = new Vector3(vertices[j].x, finalY, vertices[j].z);
+            }
+        }
+        //-------------------------------------------------------
+
     }
 
     float PerlinNoise(float freq, float amp, Vector2 vertex)
     {
-        float noiseValue = 0f;
+
+        float noiseValue = 1f;
         for (int o = 0; o < octaves; o++)
         {
             float xCoord = (float)vertex.x / (xSize - 1) * scale * freq + offset.x;
             float zCoord = (float)vertex.y / (ySize - 1) * scale * freq + offset.y;
 
-            //noiseValue += Unity.Mathematics.noise.cellular(new Unity.Mathematics.float2(xCoord, zCoord)).y - 0.5f * amp;
+            //---------------------------------
+            //Test area
 
-            noiseValue += (Mathf.PerlinNoise(xCoord, zCoord) - 0.5f) * amp;
-            //noiseValue += (Unity.Mathematics.noise.cnoise(new Unity.Mathematics.float2(xCoord, zCoord)) - 0.5f) * amp;
+            //float distance = Vector2.Distance(center, new Vector2(vertex.x, vertex.y));
+            //float maxDistance = planeResolution*2;
+            //float modulation = Mathf.Max(0, 1 - (distance / maxDistance));
+
+            //Vector2 direction = new Vector2(0.5f, 0.5f).normalized;
+            //float maxT =
+            //    Mathf.Abs(direction.x) * xSize +
+            //    Mathf.Abs(direction.y) * ySize;
+
+            //float t = Vector2.Dot(vertex, direction);
+            //float factor = Mathf.Clamp01(t / maxT);
+
+
+
+            //---------------------------------
+
+            float tempNoiseValue = (Mathf.PerlinNoise(xCoord, zCoord) - 0.5f);
+
+            if(turbulence)
+            {
+                float turbulence = Mathf.Abs(tempNoiseValue);
+                noiseValue += turbulence * amp;
+            }
+            else
+            {
+                //---------------------------------------
+                //Test area
+
+                //float ridge = (1f - Mathf.Abs(tempNoiseValue));
+                //noiseValue += ridge * amp * noiseValue;
+
+                //noiseValue = noiseValue + tempNoiseValue * amp * noiseValue ;
+
+                //noiseValue += tempNoiseValue * amp * modulation;
+                //noiseValue += tempNoiseValue * amp * factor;
+
+                //---------------------------------------
+
+
+                noiseValue += tempNoiseValue * amp;
+            }
             float billowNoise = Mathf.Abs(noiseValue);
-            float ridgeNoise = 0f - billowNoise;
+            float ridgeNoise = 1f - billowNoise;
 
             noiseValue = Mathf.Lerp(noiseValue, ridgeNoise, Mathf.Max(0f, sharpness));
             noiseValue = Mathf.Lerp(noiseValue, billowNoise, -Mathf.Min(0f, sharpness));
 
-
-
             amp *= gain;
             freq *= lacunarity;
+
+            //--------------------------------
+            //Test area
+
+            //noiseValue = Mathf.Clamp(noiseValue, 0f, 1f);
+            //noiseValue = Mathf.Sin(noiseValue);
+
+
+            //noiseValue = Mathf.Cos(noiseValue);
+            //noiseValue = Mathf.Tan(noiseValue);
+            //noiseValue = Mathf.Asin(noiseValue);
+            //noiseValue = Mathf.Atan(noiseValue);
+            //noiseValue = (float)System.Math.Tanh((double)noiseValue);
+
+            //--------------------------------
         }
         return noiseValue;
     }
@@ -205,13 +323,24 @@ public class GenerateTerrainMesh : MonoBehaviour
     float VoronoiNoise(float freq, float amp, Vector2 vertex)
     {
         float noiseValue = 0f;
-        for (int o = 0; o < octaves; o++)
+        for (int o = 0; o < 1; o++)
         {
             float xCoord = (float)vertex.x / (xSize - 1) * scale * freq + offset.x;
             float zCoord = (float)vertex.y / (ySize - 1) * scale * freq + offset.y;
             Vector3 noise = Noise.VoronoiNoise.Noise(xCoord, zCoord);
             //noiseValue += Noise.VoronoiNoise.CellHeight(noise.y, noise.z) * 5f;
-            noiseValue += noise.x * amp;
+
+            float tempNoiseValue = noise.x;
+
+            if (turbulence)
+            {
+                float turbulence = Mathf.Abs(tempNoiseValue);
+                noiseValue += turbulence * amp;
+            }
+            else
+            {
+                noiseValue += tempNoiseValue * amp;
+            }
 
             amp *= gain;
             freq *= lacunarity;
@@ -248,7 +377,7 @@ public class GenerateTerrainMesh : MonoBehaviour
 
             noiseValue = SimplexNoise(freq, amp, vertex);
 
-            if (noiseModificator == NoiseModificator.domain_warping)
+            if (domainWarping)
             {
                 Vector2 warpedCoords1 = new Vector2(SimplexNoise(freq, amp, vertex + new Vector2(warpValues[0], warpValues[1])),
                 SimplexNoise(freq, amp, vertex + new Vector2(warpValues[2], warpValues[3])));
@@ -274,20 +403,34 @@ public class GenerateTerrainMesh : MonoBehaviour
             float xCoord = (float)vertex.x / (xSize - 1) * scale * freq + offset.x;
             float zCoord = (float)vertex.y / (ySize - 1) * scale * freq + offset.y;
 
+            float tempNoise = 0f;
+
             Vector3 noise = Noise.SimplexNoise.Noise(xCoord, zCoord);
-            //Vector3 noise = Unity.Mathematics.noise.srdnoise(new float2(xCoord, zCoord));
+
             if (derivativeModificator == DerivativeModificator.derivative_simplex)
             {
                 Vector2 dsum = new Vector2(noise.y, noise.z);
-                noiseValue += amp * noise.x * (1.0f / (1 + 150 * Vector2.Dot(dsum, dsum)));
+                tempNoise = amp * noise.x * (1.0f / (1 + derivativeMultiplication * Vector2.Dot(dsum, dsum)));
             }
             else
             {
-                noiseValue += (noise.x - 0.5f) * amp;
+                tempNoise = (noise.x - 0.5f) * amp;
             }
 
+            if (turbulence)
+            {
+                float turbulence = (Mathf.Abs(noise.x) - 0.5f) * amp;
+                tempNoise = turbulence;
+            }
+            else
+            {
+                tempNoise = (noise.x - 0.5f) * amp;
+            }
+
+            noiseValue += tempNoise;
+
             float billowNoise = Mathf.Abs(noiseValue);
-            float ridgeNoise = 0f - billowNoise;
+            float ridgeNoise = 1f - billowNoise;
 
             noiseValue = Mathf.Lerp(noiseValue, ridgeNoise, Mathf.Max(0f, sharpness));
             noiseValue = Mathf.Lerp(noiseValue, billowNoise, -Mathf.Min(0f, sharpness));
@@ -307,6 +450,24 @@ public class GenerateTerrainMesh : MonoBehaviour
         return noiseValue;
     }
 
+    float ValueNoise(float freq, float amp, Vector2 vertex)
+    {
+        float noiseValue = 0f;
+        for (int o = 0; o < 1; o++)
+        {
+            float xCoord = (float)vertex.x / (xSize - 1) * scale * freq + offset.x;
+            float zCoord = (float)vertex.y / (ySize - 1) * scale * freq + offset.y;
+            float noise = Noise.ValueNoise.Noise(xCoord, zCoord);
+
+            noiseValue += noise * amp;
+            
+
+            amp *= gain;
+            freq *= lacunarity;
+        }
+        return noiseValue;
+    }
+
     void Update()
     {
         if (Input.GetKey(KeyCode.Space) && !terrainGenerated)
@@ -318,6 +479,21 @@ public class GenerateTerrainMesh : MonoBehaviour
         if (!Input.GetKey(KeyCode.Space))
         {
             terrainGenerated = false;
+        }
+    }
+
+    private void OnValidate()
+    {
+        if (warpingImpact.Length != 3)
+        {
+            Debug.LogWarning("Don't change the array size!");
+            System.Array.Resize(ref warpingImpact, 3);
+        }
+
+        if (warpValues.Length != 8)
+        {
+            Debug.LogWarning("Don't change the array size!");
+            System.Array.Resize(ref warpValues, 8);
         }
     }
 

@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class ErosionGenerator : MonoBehaviour
+public class ParticleErosion : MonoBehaviour
 {
     [SerializeField] private GameObject terrain;
 

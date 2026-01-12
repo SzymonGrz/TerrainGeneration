@@ -27,8 +27,8 @@ namespace Noise
                     {
                         m.x = Mathf.Min(m.x, d);
                         Vector2 temp = p + g;
-                        m.y = temp.x;
-                        m.z = temp.y;
+                        m.y = -2f * r.x;//temp.x;
+                        m.z = -2f * r.y;//temp.y;
                     }    
                 }
             }
