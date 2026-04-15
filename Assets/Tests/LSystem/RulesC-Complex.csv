@@ -1,0 +1,7 @@
+RulesC-Complex;numberOfSegments;totalRiverLength;numberOfSplits;numberOFSegmentsOnMap;riverLengthOnMap;mapCoverage
+Test1;256;5632;48;256;5632;0,007908335
+Test2;256;10240;47;256;10240;0,0178565
+Test3;256;8704;49;256;8704;0,01570113
+Test4;256;7680;46;256;7680;0,01160155
+Test5;256;5632;44;256;5632;0,007856542
+

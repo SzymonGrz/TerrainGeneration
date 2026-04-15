@@ -1,23 +1,27 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LSystemRiver : MonoBehaviour
 {
-    // Start is called before the first frame update
+    
     private string lSystemString;
     [SerializeField] private float[] stepLengths;
     [SerializeField] private float[] angles;
 
     [SerializeField] private GameObject terrain;
+    [SerializeField] private int planeResolution;
+    [SerializeField] private int xSize;
+    [SerializeField] private int ySize;
 
     private Mesh mesh;
     private Vector3[] vertices;
     [SerializeField] private float radius = 2;
     [SerializeField] private float depth = 10;
-    private List<Vector3> riverPoints;
     Transform t;
+
+    private static float[] riverMask;
 
     private class Segment
     {
@@ -26,7 +30,8 @@ public class LSystemRiver : MonoBehaviour
         public Segment(Vector3 a, Vector3 b) { this.a = a; this.b = b; }
     }
 
-    private List<Segment> riverSegments = new List<Segment>();
+    private List<Vector2> riverSegmentsA = new List<Vector2>();
+    private List<Vector2> riverSegmentsB = new List<Vector2>();
 
 
     private Stack<TurtleState> stateStack;
@@ -62,14 +67,15 @@ public class LSystemRiver : MonoBehaviour
         mesh = terrain.GetComponent<MeshFilter>().mesh;
         t = terrain.GetComponent<MeshFilter>().transform;
         vertices = mesh.vertices;
-        riverPoints = new List<Vector3>();
-
         Draw();
         CreateRiver();
         mesh.vertices = vertices;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-        //CorrectTiles();
+
+        //Experiment();
+        ExperimentTime();
+
 
     }
 
@@ -77,21 +83,28 @@ public class LSystemRiver : MonoBehaviour
     {
         stateStack = new Stack<TurtleState>();
 
-        int vertexIndex = vertices.Length /2 ;
-        Vector3 currentPosition = vertices[vertexIndex];
+
+
+        Vector3 currentPosition = new Vector3(
+                mesh.bounds.center.x,
+                mesh.bounds.center.y,
+                mesh.bounds.min.z
+        );
+
         Quaternion currentRotation = Quaternion.identity;
         float currentStepLength = stepLengths[UnityEngine.Random.Range(0, stepLengths.Length)];
 
         foreach (char c in lSystemString)
         {
-            float angle = angles[UnityEngine.Random.Range(0, angles.Length)];
+            
             if (c == 'F' || c == 'G')
             {
                 Vector3 startPos = currentPosition;
                 Vector3 endPos = currentPosition +
                                  currentRotation * Vector3.forward * currentStepLength;
 
-                riverPoints.Add(endPos);
+                riverSegmentsA.Add(new Vector2(currentPosition.x, currentPosition.z));
+                riverSegmentsB.Add(new Vector2(endPos.x, endPos.z));
 
                 currentPosition = endPos;
             }
@@ -101,10 +114,12 @@ public class LSystemRiver : MonoBehaviour
             }
             else if (c == '+')
             {
+                float angle = angles[UnityEngine.Random.Range(0, angles.Length)];
                 currentRotation *= Quaternion.Euler(0, -angle, 0);
             }
             else if (c == '-')
             {
+                float angle = angles[UnityEngine.Random.Range(0, angles.Length)];
                 currentRotation *= Quaternion.Euler(0, angle, 0);
             }
             else if (c == '[')
@@ -126,33 +141,42 @@ public class LSystemRiver : MonoBehaviour
 
     private void CreateRiver()
     {
-        for (int i = 0; i < riverPoints.Count - 1; i++)
-            riverSegments.Add(new Segment(riverPoints[i], riverPoints[i + 1]));
+        riverMask = new float[vertices.Length];
 
+        float maxFalloff;
 
         for (int i = 0; i < vertices.Length; i++)
         {
-            //Vector3 worldV = t.TransformPoint(vertices[i]);
+            maxFalloff = 0f;
             Vector2 v2 = new Vector2(vertices[i].x, vertices[i].z);
-            float maxFalloff = 0f;
 
-            foreach (var seg in riverSegments)
+            for (int j = 0; j < riverSegmentsA.Count; j++)
             {
-                float dist = DistPointSegment(
-                    v2,
-                    new Vector2(seg.a.x, seg.a.z),
-                    new Vector2(seg.b.x, seg.b.z)
-                );
+
+                //Vector2 segA = new Vector2(riverSegments[j].a.x, riverSegments[j].a.z);
+                //Vector2 segB = new Vector2(riverSegments[j].b.x, riverSegments[j].b.z);
+
+                float dist = DistPointSegment(v2, riverSegmentsA[j], riverSegmentsB[j]);
+
 
                 if (dist < radius)
                 {
                     float t = dist / radius;
-                    float falloff = Mathf.SmoothStep(1f, 0f, t);
-                    maxFalloff = Mathf.Max(maxFalloff, falloff);
-                    
+                    //maxFalloff = 1;
+                    float falloff = Mathf.Exp(-t * t * 4f); 
+                    if (falloff > maxFalloff)
+                    {
+                        maxFalloff = falloff;
+                    }
+
                 }
+                
             }
-            vertices[i].y -= depth * maxFalloff;
+            if (maxFalloff > 0f)
+            {
+                vertices[i].y -= depth * maxFalloff;
+                riverMask[i] = Mathf.Max(riverMask[i], maxFalloff);
+            }
         }
 
     }
@@ -165,6 +189,175 @@ public class LSystemRiver : MonoBehaviour
         return Vector2.Distance(p, proj);
     }
 
+    public static float[] getRiverMask()
+    {
+        return riverMask;
+    }
 
+    private void Experiment()
+    {
+
+        List<ExperimentResultLsystem> results = new List<ExperimentResultLsystem>();
+        //string[] values = {"A", "B", "C", "D", "E"};
+
+        string[] values = { "Test1", "Test2", "Test3", "Test4", "Test5" };
+
+        //float[][] tableValues =
+        //{
+        //    new float[] {22, 24, 25, 26, 28, 30},
+        //    new float[] {22, 28, 34, 40, 46, 52},
+        //    new float[] {10, 20, 40, 55, 70, 80}
+        //};
+
+        //float[][] tableValues =
+        //{
+        //    new float[] {22, 24, 25, 26, 28, 30},
+        //    new float[] {22, 28, 34, 40, 46, 52},
+        //    new float[] {10, 20, 40, 55, 70, 80}
+        //};
+
+        LSystem creator = new LSystem();
+
+        string parameterName = "RulesC-Complex";
+
+        //for (int j = 0; j < tableValues.Length; j++)
+        {
+            for (int k = 0; k < 5; k++)
+            {
+                //iterations = (int)values[j];
+                //stepLengths = tableValues[j];
+                riverMask = new float[vertices.Length];
+                riverSegmentsA.Clear();
+                riverSegmentsB.Clear();
+                stateStack.Clear();
+
+                lSystemString = creator.lSystem(axioms, rules, iterations);
+                Draw();
+                CreateRiver();
+
+                int numberOfSegments = riverSegmentsA.Count;
+                int numberOfSegmentsOnMap = 0;
+
+                float totalRiverLength = 0f;
+                float riverLengthOnMap = 0f;
+
+                float cellSize = 2f;
+
+                Dictionary<(float, float), List<Vector2>> segments = new Dictionary<(float, float), List<Vector2>>();
+
+                List<Vector2> points = new List<Vector2>(riverSegmentsA);
+                points.AddRange(riverSegmentsB);
+
+                for (int i = 0; i < riverSegmentsA.Count; i++)
+                {
+                    float segmentLength = Vector2.Distance(riverSegmentsA[i], riverSegmentsB[i]);
+
+                    if ((riverSegmentsA[i].x >= 0 && riverSegmentsA[i].x < xSize
+                        && riverSegmentsA[i].y >= 0 && riverSegmentsA[i].y < ySize)
+                        && (riverSegmentsB[i].x >= 0 && riverSegmentsB[i].x < xSize
+                        && riverSegmentsB[i].y >= 0 && riverSegmentsB[i].y < ySize))
+                    {
+
+                        riverLengthOnMap += segmentLength;
+                        numberOfSegmentsOnMap++;
+                    }
+                    totalRiverLength += segmentLength;
+
+                }
+
+                for (int i = 0; i < points.Count; i++)
+                {
+                    float cellX = Mathf.Floor(points[i].x / cellSize);
+                    float cellY = Mathf.Floor(points[i].y / cellSize);
+
+                    if (segments.ContainsKey((cellX, cellY)))
+                    {
+                        segments[(cellX, cellY)].Add(points[i]);
+                    }
+                    else
+                    {
+                        segments.Add((cellX, cellY), new List<Vector2>());
+                    }
+                }
+
+                int numberOfSplits = 0;
+
+                foreach (var segment in segments)
+                {
+                    if (segment.Value.Count >= 3)
+                    {
+                        numberOfSplits++;
+                    }
+                }
+
+                float riverCount = 0f;
+                float threshold = 0.1f;
+
+                if (riverMask != null)
+                {
+                    for (int i = 0; i < riverMask.Length; i++)
+                    {
+                        if (riverMask[i] > threshold)
+                        {
+                            riverCount++;
+                        }
+                    }
+                }
+
+                float coverage = riverCount / riverMask.Length;
+
+                results.Add(new ExperimentResultLsystem
+                {
+                    parameter = values[k],
+                    numberOfSegments = numberOfSegments,
+                    totalRiverLength = totalRiverLength,
+                    numberOfSplits = numberOfSplits,
+                    numberOfSegmentsOnMap = numberOfSegmentsOnMap,
+                    riverLengthOnMap = riverLengthOnMap,
+                    mapCoverage = coverage,
+                });
+            }
+
+        }
+
+        Metrics.SaveLSystemToCSV(results, "LSystem/" + parameterName + ".csv", parameterName);
+        //Debug.Log("number of segments: " + numberOfSegments + " total river length: " + totalRiverLength +
+        //    " number of splits: " + numberOfSplits + " number of segments on map: " + numberOfSegmentsOnMap +
+        //    " river length on map: " + riverLengthOnMap + " map coverage: " + coverage);
+    }
+
+    private void ExperimentTime()
+    {
+        LSystem creator = new LSystem();
+
+        List<(float, float)> results = new List<(float, float)> ();
+
+        float[] values = { 1, 2, 4, 6, 8 };
+
+        for (int i = 0; i < values.Length; i++) {
+
+            iterations = (int)values[i];
+            for (int k = 0; k < 3; k++)
+            {
+                //iterations = (int)values[j];
+                //stepLengths = tableValues[j];
+                riverMask = new float[vertices.Length];
+                riverSegmentsA.Clear();
+                riverSegmentsB.Clear();
+                stateStack.Clear();
+
+                lSystemString = creator.lSystem(axioms, rules, iterations);
+                float start = Time.realtimeSinceStartup;
+                Draw();
+                CreateRiver();
+                start -= Time.realtimeSinceStartup;
+
+                results.Add((iterations, -start * 1000));
+
+            }
+        }
+
+        Metrics.SaveTimeToCSV(results, "/LSystem/timeSlow" + ".csv", "Iterations");
+    }
 
 }

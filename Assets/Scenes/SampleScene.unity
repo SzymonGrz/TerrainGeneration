@@ -200,6 +200,158 @@ Terrain:
   m_GroupingID: 0
   m_RenderingLayerMask: 1
   m_AllowAutoConnect: 1
+--- !u!1 &498173798
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 498173800}
+  - component: {fileID: 498173799}
+  m_Layer: 0
+  m_Name: RiverA
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &498173799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498173798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0cc42f6019b42949be4622a757a2ffc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stepLengths:
+  - 22
+  - 26
+  - 30
+  - 34
+  - 40
+  angles:
+  - 15
+  - 17
+  - 20
+  - 22
+  - 25
+  - 28
+  - 30
+  - 32
+  - 35
+  terrain: {fileID: 1649822829}
+  planeResolution: 500
+  xSize: 1000
+  ySize: 1000
+  radius: 15
+  depth: 30
+  axioms:
+  - F
+  rules:
+  - character: 70
+    values:
+    - "F[+F][\u2212F]"
+    isRandom: 0
+  iterations: 4
+  shorterRoads: 0
+  lengthFactor: 0.5
+--- !u!4 &498173800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498173798}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -40.410984, y: 1745.7697, z: 205.98851}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 12
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &533536769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 533536771}
+  - component: {fileID: 533536770}
+  m_Layer: 0
+  m_Name: RiverC
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &533536770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 533536769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0cc42f6019b42949be4622a757a2ffc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stepLengths:
+  - 22
+  - 26
+  - 30
+  - 34
+  - 40
+  angles:
+  - 15
+  - 17
+  - 20
+  - 22
+  - 25
+  - 28
+  - 30
+  - 32
+  - 35
+  terrain: {fileID: 1649822829}
+  planeResolution: 500
+  xSize: 1000
+  ySize: 1000
+  radius: 15
+  depth: 30
+  axioms:
+  - F
+  rules:
+  - character: 70
+    values:
+    - "F[+F][\u2212F][+F]"
+    isRandom: 0
+  iterations: 4
+  shorterRoads: 0
+  lengthFactor: 0.5
+--- !u!4 &533536771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 533536769}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -40.410984, y: 1745.7697, z: 205.98851}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 14
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &555884062
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,6 +449,82 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1287714808}
   m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &641473534
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 641473536}
+  - component: {fileID: 641473535}
+  m_Layer: 0
+  m_Name: RiverB
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &641473535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641473534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0cc42f6019b42949be4622a757a2ffc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stepLengths:
+  - 22
+  - 26
+  - 30
+  - 34
+  - 40
+  angles:
+  - 15
+  - 17
+  - 20
+  - 22
+  - 25
+  - 28
+  - 30
+  - 32
+  - 35
+  terrain: {fileID: 1649822829}
+  planeResolution: 500
+  xSize: 1000
+  ySize: 1000
+  radius: 15
+  depth: 30
+  axioms:
+  - F
+  rules:
+  - character: 70
+    values:
+    - "F[+F][\u2212F]F"
+    isRandom: 0
+  iterations: 4
+  shorterRoads: 0
+  lengthFactor: 0.5
+--- !u!4 &641473536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641473534}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -40.410984, y: 1745.7697, z: 205.98851}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
@@ -898,7 +1126,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1287714807}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 424.9042, y: -2207.307, z: 290.38974}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -907,13 +1135,11 @@ Transform:
   - {fileID: 2004664506}
   - {fileID: 1265751576}
   - {fileID: 555884066}
-  - {fileID: 1556541103}
-  - {fileID: 1301612501}
   - {fileID: 1459883731}
   - {fileID: 1873880767}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!1 &1301612499
 GameObject:
   m_ObjectHideFlags: 0
@@ -930,7 +1156,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1301612501
 Transform:
   m_ObjectHideFlags: 0
@@ -938,13 +1164,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301612499}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -424.9042, y: 2207.307, z: -290.38974}
+  m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: -1782.403, y: -2632.2114, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1287714808}
-  m_RootOrder: 5
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1301612502
 MonoBehaviour:
@@ -959,33 +1185,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stepLengths:
-  - 10
-  - 15
-  - 20
+  - 22
+  - 26
   - 30
+  - 34
   - 40
   angles:
   - 15
+  - 17
   - 20
+  - 22
   - 25
+  - 28
   - 30
-  - 45
+  - 32
+  - 35
   terrain: {fileID: 1649822829}
-  radius: 5
-  depth: 10
+  planeResolution: 500
+  xSize: 1000
+  ySize: 1000
+  radius: 15
+  depth: 30
   axioms:
-  - X
+  - I
   rules:
+  - character: 73
+    values:
+    - F-F-RX
+    - F+F-RX
+    - F-F+RX
+    isRandom: 1
   - character: 88
     values:
-    - F[+X][-X]F[+X][-X]
-    - F[+X]F[-X]
+    - +F-F+RI
+    - -F+F+RI
     isRandom: 1
-  - character: 70
+  - character: 82
     values:
-    - FF
-    isRandom: 0
-  iterations: 4
+    - F[SL]F
+    - F[LS]F
+    isRandom: 1
+  - character: 83
+    values:
+    - F+I-
+    - F-I+
+    isRandom: 1
+  - character: 76
+    values:
+    - F-I+
+    - F+I-
+    isRandom: 1
+  iterations: 8
   shorterRoads: 0
   lengthFactor: 0.5
 --- !u!1 &1459883729
@@ -1053,7 +1303,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1287714808}
-  m_RootOrder: 6
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1515964021
 GameObject:
@@ -1203,20 +1453,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stepLengths:
-  - 60
+  - 20
   angles:
-  - 35
+  - 32
   terrain: {fileID: 1649822829}
-  radius: 5
-  depth: 10
+  planeResolution: 500
+  xSize: 0
+  ySize: 0
+  radius: 60
+  depth: 100
   axioms:
   - F
   rules:
   - character: 70
     values:
-    - F[+F][-F]F
+    - F-F+F+F-F
     isRandom: 0
-  iterations: 4
+  iterations: 3
   shorterRoads: 0
   lengthFactor: 0.5
 --- !u!4 &1556541103
@@ -1226,14 +1479,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556541101}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -424.9042, y: 2207.307, z: -290.38974}
+  m_LocalRotation: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+  m_LocalPosition: {x: -1782.403, y: -2632.2114, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1287714808}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 90, y: 90, z: 90}
 --- !u!1 &1564402065
 GameObject:
   m_ObjectHideFlags: 0
@@ -1325,12 +1578,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564402065}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1225, y: -60, z: 3575}
+  m_LocalPosition: {x: 136, y: 1158, z: 133}
   m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1649822829
 GameObject:
@@ -1343,7 +1596,7 @@ GameObject:
   - component: {fileID: 1649822833}
   - component: {fileID: 1649822832}
   - component: {fileID: 1649822831}
-  - component: {fileID: 1649822830}
+  - component: {fileID: 1649822834}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -1351,50 +1604,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1649822830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1649822829}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbf1038416370c44c97e683176de611f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  xSize: 1000
-  ySize: 1000
-  planeResolution: 256
-  scale: 0.5
-  heightMultiplier: 30
-  offset: {x: 0, y: 0}
-  amplitude: 5
-  gain: 0.5
-  frequency: 3
-  lacunarity: 2
-  octaves: 8
-  noiseType: 0
-  domainWarping: 0
-  turbulence: 0
-  derivativeModificator: 1
-  derivativeMultiplication: 100
-  sharpness: 0
-  warpingImpact:
-  - 20
-  - 20
-  - 20
-  warpValues:
-  - 100
-  - -40
-  - -20
-  - 10
-  - 26
-  - 2
-  - 80
-  - 40
-  interpolation: 0
-  isTerrace: 0
 --- !u!23 &1649822831
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1460,6 +1669,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1649822834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649822829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf1038416370c44c97e683176de611f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xSize: 1000
+  ySize: 1000
+  planeResolution: 256
 --- !u!1 &1733753814
 GameObject:
   m_ObjectHideFlags: 0
@@ -1491,9 +1715,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   terrain: {fileID: 1649822829}
   mapSize: 256
+  iterations: 1
   threshold: 3
-  iterations: 200
   c: 0.134
+  isTesting: 1
 --- !u!4 &1733753816
 Transform:
   m_ObjectHideFlags: 0
@@ -1604,7 +1829,7 @@ RectTransform:
   m_Children:
   - {fileID: 1001621081}
   m_Father: {fileID: 1287714808}
-  m_RootOrder: 7
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1736,17 +1961,97 @@ MonoBehaviour:
   terrain: {fileID: 1649822829}
   inertia: 0.001
   initialSpeed: 3
-  initialWaterVolume: 3
+  initialWaterVolume: 10
   minCapacity: 0.02
-  capacity: 100
+  capacity: 10
   deposition: 0.3
   erosion: 0.8
   gravity: 10
   evaporation: 0.01
   radius: 3
   maxPath: 30
-  mapSize: 257
-  iterations: 75000
+  mapSize: 1001
+  iterations: 200000
+  isTesting: 1
+--- !u!1 &1986377361
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1986377362}
+  - component: {fileID: 1986377363}
+  m_Layer: 0
+  m_Name: NoiseGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1986377362
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986377361}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 604.8642, y: 1553.0093, z: 283.6138}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1986377363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986377361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b89bd19c50eab484abb2bb12bbd84d7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xSize: 1000
+  ySize: 1000
+  planeResolution: 256
+  plane: {fileID: 1649822829}
+  scale: 2
+  heightMultiplier: 10
+  offset: {x: 0, y: 0}
+  amplitude: 10
+  gain: 0.5
+  frequency: 4
+  lacunarity: 2
+  octaves: 8
+  noiseType: 0
+  domainWarping: 0
+  turbulence: 0
+  derivativeModificator: 1
+  derivativeMultiplication: 150
+  sharpness: 0
+  warpingImpact:
+  - 10
+  - 10
+  - 10
+  warpValues:
+  - 3
+  - 5
+  - 5.2
+  - 1.3
+  - 1.7
+  - 9.2
+  - 8.3
+  - 2.8
+  interpolation: 0
+  isTerrace: 0
+  testing: 0
+  riverRadius: 8
 --- !u!1 &1993216093
 GameObject:
   m_ObjectHideFlags: 0
@@ -1778,10 +2083,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   terrain: {fileID: 1649822829}
   mapSize: 256
-  iterations: 100
-  capacity: 5
-  deposition: 0.2
-  softness: 0.5
+  iterations: 200
+  capacity: 4
+  deposition: 0.3
+  softness: 0.1
+  isTesting: 1
 --- !u!4 &1993216095
 Transform:
   m_ObjectHideFlags: 0

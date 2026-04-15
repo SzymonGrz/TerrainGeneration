@@ -1,5 +1,7 @@
-using UnityEngine;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public class ParticleErosion : MonoBehaviour
 {
@@ -20,6 +22,9 @@ public class ParticleErosion : MonoBehaviour
     [SerializeField] private int mapSize = 256;
     [SerializeField] private int iterations = 30000;
 
+    [Header("Testing")]
+    [SerializeField] private bool isTesting = false;
+
     private float[][] weights;
     private int[][] indices;
 
@@ -28,48 +33,149 @@ public class ParticleErosion : MonoBehaviour
 
     void Start()
     {
-        CalculateWeights(mapSize ,radius);
+        CalculateWeights(mapSize, radius);
         Mesh mesh = terrain.GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
         float[] heights = vertices.Select(p => p.y).ToArray();
+        float[] newHeights;
 
         float minHeight = heights.Min();
         if (minHeight < 0f)
         {
-            for (int i = 0; i < heights.Length; i++)
-                heights[i] -= minHeight; 
+            //for (int i = 0; i < heights.Length; i++)
+            //    heights[i] -= minHeight;
+
+            terrain.transform.position = new Vector3(terrain.transform.position.x,
+                terrain.transform.position.y - minHeight, terrain.transform.position.z);
         }
 
-        float[] newHeights = Erode(heights, mapSize, iterations);
 
-        for (int i = 0; i < newHeights.Length; i++)
-            newHeights[i] += minHeight;
+        //for (int i = 0; i < 5; i++)
+        //{
+        //    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+        //    
+        //    long end = sw.ElapsedMilliseconds;
+        //    Debug.Log(end);
+        //}
+
+        //float[] newHeights = Erode(heights, mapSize, iterations);
+
+        //for (int i = 0; i < newHeights.Length; i++)
+        //    newHeights[i] += minHeight;
+
+        //for (int i = 0; i < vertices.Length; i++)
+        //{
+        //    vertices[i].y = newHeights[i];
+        //}
+        //mesh.vertices = vertices;
+        //mesh.RecalculateNormals();
+        //mesh.RecalculateBounds();
+
+        if (!isTesting)
+        {
+            newHeights = Erode(heights, mapSize, iterations);
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].y = newHeights[i];
+            }
+            for (int i = 0; i < newHeights.Length; i++)
+                newHeights[i] += minHeight;
+            mesh.vertices = vertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return;
+        }
+
+
+        //----------BADANIA------------------
+
+        newHeights = new float[0];
+
+        //float[] testValues = { 10, 30, 50, 100, 200 };
+
+        //int[] values = {1, 9, 40, 50, 400, 500,
+        //   1000, 3000, 5000, 10000, 30000, 50000, 50000, 50000};
+
+        float[] testValues = { 50000, 100000, 200000 };
+
+        //List<ExperimentResultErosion> results = new List<ExperimentResultErosion>();
+        //int sum;
+
+        List<(float, float)> results = new List<(float, float)> ();
+
+        foreach (float testValue in testValues)
+        {
+
+            for (int i = 0; i < 10; i++)
+            {
+                iterations = (int)testValue;
+                float start = Time.realtimeSinceStartup;
+                Erode(heights, mapSize, (int)testValue);
+                start -= Time.realtimeSinceStartup;
+                results.Add((testValue, -start * 1000));
+            }
+
+            Metrics.SaveTimeToCSV(results, "/ParticleErosion/time" + (mapSize-1) + ".csv", "Iterations");
+
+            //--------PARAMETR-------------
+
+            //erosion
+
+            //string parameterName = "MaxPath";
+
+            //maxPath = (int)testValue;
+
+            //-----------------------------
+
+            //heights = vertices.Select(p => p.y).ToArray();
+            //results.Clear();
+            //sum = 0;
+
+            //foreach (int value in values)
+            //{
+            //    sum += value;
+            //    newHeights = Erode(heights, mapSize, value);
+                
+
+            //    float stdDev = Metrics.StdDev(newHeights);
+            //    float avgGradient = Metrics.MeanGrad(newHeights, mapSize - 1, 2);
+            //    float varG = Metrics.GradientVariance();
+            //    float ruggedness = Metrics.Ruggedness(newHeights, mapSize - 1);
+            //    float meanAbsCurvature = Metrics.MeanAbsCurvature(newHeights, mapSize - 1);
+            //    float skewness = Metrics.HeightSkewness(newHeights, mapSize - 1);
+            //    float erosionScore = Metrics.ErosionScore(newHeights, mapSize - 1);
+
+            //    results.Add(new ExperimentResultErosion
+            //    {
+            //        iterations = sum,
+            //        stdDev = stdDev,
+            //        avgGradient = avgGradient,
+            //        varGradient = varG,
+            //        ruggedness = ruggedness,
+            //        meanAbsCurvature = meanAbsCurvature,
+            //        skewness = skewness,
+            //        erosionScore = erosionScore,
+            //    });
+
+            //    heights = newHeights;
+
+            //}
+
+            //Metrics.SaveErosionToCSV(results, "particleErosion/New/" + parameterName + testValue + ".csv");
+        }
 
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices[i].y = newHeights[i];
         }
+
         mesh.vertices = vertices;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-    }
 
-    /*void Update()
-    {
-        if(iterations > 0)
-        {
-            Erode(heights, mapSize, iterations);
-            //float[] newHeights = heights; 
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                vertices[i].y = heights[i];
-            }
-            mesh.vertices = vertices;
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-            iterations--;
-        }
-    }*/
+        
+
+    }
 
     public float[] Erode(float[] heights, int size, int iterations)
     {

@@ -1,0 +1,7 @@
+RulesB-Moderate;numberOfSegments;totalRiverLength;numberOfSplits;numberOFSegmentsOnMap;riverLengthOnMap;mapCoverage
+Test1;256;10240;56;256;10240;0,04965319
+Test2;256;8704;55;256;8704;0,04317911
+Test3;256;10240;55;256;10240;0,05721093
+Test4;256;7680;56;256;7680;0,03692814
+Test5;256;10240;56;256;10240;0,05088028
+

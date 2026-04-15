@@ -1,0 +1,13 @@
+iterations;stdDev;avgGradient;varGradient
+1;16,78844;1,771244;1,265643
+5;16,66282;1,727856;1,157883
+10;16,78087;1,738878;8,750033
+20;72690,37;1586,464;5,432209E+09
+50;+nieskończoność;+nieskończoność;NaN
+100;NaN;NaN;NaN
+200;NaN;NaN;NaN
+400;NaN;NaN;NaN
+600;NaN;NaN;NaN
+800;NaN;NaN;NaN
+1000;NaN;NaN;NaN
+

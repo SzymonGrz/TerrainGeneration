@@ -6,21 +6,28 @@ namespace Noise
 {
     public class SimplexNoise
     {
-        private static int[][] grad3 = new int[][]
+        private static float[][] grad2 = new float[][]
         {
-        new int[]{1,1,0},
-        new int[]{-1,1,0},
-        new int[]{1,-1,0},
-        new int[]{-1,-1,0},
-        new int[]{1,0,1},
-        new int[]{-1,0,1},
-        new int[]{1,0,-1},
-        new int[]{-1,0,-1},
-        new int[]{0,1,1},
-        new int[]{0,-1,1},
-        new int[]{0,1,-1},
-        new int[]{0,-1,-1}};
+            new float[]{1,0},
+            new float[]{-1,0},
+            new float[]{0,1},
+            new float[]{0,-1},
 
+            new float[]{0.7071f,0.7071f},
+            new float[]{-0.7071f,0.7071f},
+            new float[]{0.7071f,-0.7071f},
+            new float[]{-0.7071f,-0.7071f},
+
+            new float[]{0.9239f,0.3827f},
+            new float[]{-0.9239f,0.3827f},
+            new float[]{0.9239f,-0.3827f},
+            new float[]{-0.9239f,-0.3827f},
+
+            new float[]{0.3827f,0.9239f},
+            new float[]{-0.3827f,0.9239f},
+            new float[]{0.3827f,-0.9239f},
+            new float[]{-0.3827f,-0.9239f}
+        };
 
 
         private static short[] p =
@@ -72,9 +79,22 @@ namespace Noise
             return a;
         }
 
-        private static float Dot(int[] g, float x, float y)
+        private static float Dot(float[] g, float x, float y)
         {
             return g[0] * x + g[1] * y;
+        }
+
+        private static float[] Grad(int hash, float x, float y)
+        {
+            int h = hash & 7;
+
+            float u = (h < 4) ? 1f : 0f;
+            float v = (h < 4) ? 0f : 1f;
+
+            float gx = ((h & 1) == 0 ? u : -u);
+            float gy = ((h & 2) == 0 ? v : -v);
+
+            return new float[] { gx, gy };
         }
 
         public static Vector3 Noise(float xin, float yin)
@@ -105,18 +125,26 @@ namespace Noise
 
             int ii = i & 255;
             int jj = j & 255;
-            int gi0 = perm[ii + perm[jj]] % 12;
-            int gi1 = perm[ii + i1 + perm[jj + j1]] % 12;
-            int gi2 = perm[ii + 1 + perm[jj + 1]] % 12;
+            int gi0 = perm[ii + perm[jj]] & 15;
+            int gi1 = perm[ii + i1 + perm[jj + j1]] & 15;
+            int gi2 = perm[ii + 1 + perm[jj + 1]] & 15;
 
             float t0 = 0.5f - x0 * x0 - y0 * y0;
             if (t0 < 0) { n0 = 0.0f; }
             else
             {
                 t0 *= t0;
-                float gDotx = Dot(grad3[gi0], x0, y0);
-                dx += t0 * t0 * t0 * t0*  grad3[gi0][0] - 8 * t0 * t0 * t0 * gDotx * x0;
-                dy += t0 * t0 * t0 * t0 * grad3[gi0][1] - 8 * t0 * t0 * t0 * gDotx * y0;
+
+                //float gDotx = Dot(grad2[gi0], x0, y0);
+
+                float[] grad = Grad(gi0, x0, y0);
+                float gDotx = Dot(grad, x0, y0);
+
+                dx += t0 * t0 * t0 * t0 * grad[0] - 8 * t0 * t0 * t0 * gDotx * x0;
+                dy += t0 * t0 * t0 * t0 * grad[1] - 8 * t0 * t0 * t0 * gDotx * y0;
+
+                //dx += t0 * t0 * t0 * t0 *  grad2[gi0][0] - 8 * t0 * t0 * t0 * gDotx * x0;
+                //dy += t0 * t0 * t0 * t0 * grad2[gi0][1] - 8 * t0 * t0 * t0 * gDotx * y0;
                 n0 = t0 * t0 * gDotx;
             }
 
@@ -125,9 +153,16 @@ namespace Noise
             else
             {
                 t1 *= t1;
-                float gDotx = Dot(grad3[gi1], x1, y1);
-                dx += t1 * t1 * t1 * t1 * grad3[gi1][0] - 8 * t1 * t1 * t1 * gDotx * x1;
-                dy += t1 * t1 * t1 * t1 * grad3[gi1][1] - 8 * t1 * t1 * t1 * gDotx * y1;
+                //float gDotx = Dot(grad2[gi1], x1, y1);
+                float[] grad = Grad(gi1, x1, y1);
+
+                float gDotx = Dot(grad, x1, y1);
+
+                dx += t1 * t1 * t1 * t1 * grad[0] - 8 * t1 * t1 * t1 * gDotx * x1;
+                dy += t1 * t1 * t1 * t1 * grad[1] - 8 * t1 * t1 * t1 * gDotx * y1;
+
+                //dx += t1 * t1 * t1 * t1 * grad2[gi1][0] - 8 * t1 * t1 * t1 * gDotx * x1;
+                //dy += t1 * t1 * t1 * t1 * grad2[gi1][1] - 8 * t1 * t1 * t1 * gDotx * y1;
                 n1 = t1 * t1 * gDotx;
             }
 
@@ -136,13 +171,21 @@ namespace Noise
             else
             {
                 t2 *= t2;
-                float gDotx = Dot(grad3[gi2], x2, y2);
-                dx += t2 * t2 * t2 * t2 * grad3[gi2][0] - 8 * t2 * t2 * t2 * gDotx * x2;
-                dy += t2 * t2 * t2 * t2 * grad3[gi2][1] - 8 * t2 * t2 * t2 * gDotx * y2;
+                //float gDotx = Dot(grad2[gi2], x2, y2);
+
+                float[] grad = Grad(gi2, x2, y2);
+
+                float gDotx = Dot(grad, x2, y2);
+
+                dx += t2 * t2 * t2 * t2 * grad[0] - 8 * t2 * t2 * t2 * gDotx * x2;
+                dy += t2 * t2 * t2 * t2 * grad[1] - 8 * t2 * t2 * t2 * gDotx * y2;
+
+                //dx += t2 * t2 * t2 * t2 * grad2[gi2][0] - 8 * t2 * t2 * t2 * gDotx * x2;
+                //dy += t2 * t2 * t2 * t2 * grad2[gi2][1] - 8 * t2 * t2 * t2 * gDotx * y2;
                 n2 = t2 * t2 * gDotx;
             }
 
-            return 70.0f * new Vector3((n0 + n1 + n2), dx, dy);
+            return 55.0f * new Vector3((n0 + n1 + n2), dx, dy);
         }
     }
 }

@@ -1,8 +1,8 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Experimental.GraphView.Port;
+
 
 public class GridErosion : MonoBehaviour
 {
@@ -14,6 +14,10 @@ public class GridErosion : MonoBehaviour
     [SerializeField] private float deposition;
     [SerializeField] private float softness;
 
+    [Header("Testing")]
+    [SerializeField] private bool isTesting;
+
+
     private Vector3[] vertices;
     private float[] water;
     private float[] sediment;
@@ -24,6 +28,7 @@ public class GridErosion : MonoBehaviour
         Mesh mesh = terrain.GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
         float[] heights = vertices.Select(p => p.y).ToArray();
+        float[] newHeights;
 
         //float minHeight = heights.Min();
         //if (minHeight < 0f)
@@ -32,23 +37,82 @@ public class GridErosion : MonoBehaviour
         //        heights[i] += Mathf.Abs(minHeight);
         //}
 
-        water = new float[heights.Length];
-        sediment = new float[heights.Length];
-        for(int i = 0; i < water.Length; i++)
+        //for (int i = 0; i < 5; i++)
+        //{
+        //    System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+        //    
+        //    long end = sw.ElapsedMilliseconds;
+        //    Debug.Log(end);
+        //}
+
+        if (!isTesting)
         {
-            water[i] = 0f;
-            sediment[i] = 0f;
+            water = new float[heights.Length];
+            sediment = new float[heights.Length];
+            for (int i = 0; i < water.Length; i++)
+            {
+                water[i] = 0f;
+                sediment[i] = 0f;
+            }
+            newHeights = Erode(heights, mapSize, iterations);
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].y = newHeights[i];
+            }
+
+            mesh.vertices = vertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            return;
         }
 
-        float[] newHeights = Erode(heights, mapSize, iterations);
 
-        //for (int i = 0; i < newHeights.Length; i++)
-        //    newHeights[i] -= minHeight;
+        newHeights = new float[0];
+
+        float[] testValues = { 100, 200, 500 };
+
+        //List<ExperimentResultErosion> results = new List<ExperimentResultErosion>();
+        List<(float, float)> results = new List<(float, float)> ();
+
+        foreach (float testValue in testValues)
+        {
+            //--------PARAMETR-------------
+
+            //erosion
+
+            iterations = (int)testValue;
+
+            //-----------------------------
+
+            for (int j = 0; j < 5; j++)
+            {
+                heights = vertices.Select(p => p.y).ToArray();
+                water = new float[heights.Length];
+                sediment = new float[heights.Length];
+                for (int i = 0; i < water.Length; i++)
+                {
+                    water[i] = 0f;
+                    sediment[i] = 0f;
+                }
+                //results.Clear();
+
+
+                float start = Time.realtimeSinceStartup;
+                newHeights = Erode(heights, mapSize, (int)testValue);
+                start -= Time.realtimeSinceStartup;
+                results.Add((testValue, -start * 1000));
+            }
+           // newHeights = Erode(heights, mapSize, iterations);
+
+        }
+
+        Metrics.SaveTimeToCSV(results, "/GridErosion/time" + mapSize + ".csv", "Iterations");
 
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices[i].y = newHeights[i];
         }
+
         mesh.vertices = vertices;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
@@ -56,163 +120,151 @@ public class GridErosion : MonoBehaviour
 
     private float[] Erode(float[] heights, int mapSize, int iterations)
     {
-        int size = heights.Length;
-        float[] newHeights = (float[])heights.Clone();
-        float[] newWater = (float[])water.Clone();
-        float[] newSediment = (float[])sediment.Clone();
-        int width = (int)Mathf.Sqrt(heights.Length);
+        //----------------BADANIA---------------
+        List<ExperimentResultErosion> results = new List<ExperimentResultErosion>();
+        //----------------------------------
 
-        for (int i = 0; i < water.Length; i++)
+        int width = (int)Mathf.Sqrt(heights.Length);
+        int size = heights.Length;
+
+        if (water.Length != size) water = new float[size];
+        if (sediment.Length != size) sediment = new float[size];
+
+        for (int i = 0; i < size; i++)
         {
             water[i] += heights[i] * 0.001f;
         }
 
-        for (int i = 0; i < iterations; i++)
+        for (int iter = 0; iter < iterations; iter++)
         {
-            float[] deltaHeights = new float[heights.Length];
-            float[] deltaWater = new float[heights.Length];
-            float[] deltaSediment = new float[heights.Length];
+            float[] deltaHeights = new float[size];
+            float[] deltaWater = new float[size];
+            float[] deltaSediment = new float[size];
 
-            for (int j = 0; j < heights.Length; j++)
+            //---PASS 1---
+            for (int i = 0; i < size; i++)
             {
-                int x = j % width;
-                int y = j / width;
+                int x = i % width;
+                int y = i / width;
 
+                int[] dx = { -1, 1, 0, 0 };
+                int[] dy = { 0, 0, -1, 1 };
 
-                int[] dx = { -1, 1, 0, 0 };//, -1, 1, -1, 1 };
-                int[] dy = { 0, 0, -1, 1 };//, -1, -1, 1, 1 };
+                int[] neighbors = new int[4];
+                float[] diffs = new float[4];
+                int count = 0;
+                float totalDiff = 0f;
+                float topHeight = heights[i] + water[i];
 
-                float topOfWaterVertex = heights[j] + water[j];
-                float[] topOfWaterNeighbors = new float[dx.Length];
-
-                for (int k = 0; k < dx.Length; k++)
+                for (int j = 0; j < 4; j++)
                 {
-                    int nx = x + dx[k];
-                    int ny = y + dy[k];
-
+                    int nx = x + dx[j];
+                    int ny = y + dy[j];
                     if (nx >= 0 && nx < width && ny >= 0 && ny < width)
                     {
-                        int neighbor = ny * width + nx;
-
-                        topOfWaterNeighbors[k] = Mathf.Max(0f, topOfWaterVertex - (heights[neighbor] + water[neighbor]));
-
-                    }
-                }
-
-                float sumOfNeighbors = topOfWaterNeighbors.Sum();
-                if (sumOfNeighbors > 0f)
-                {
-                    for (int k = 0; k < dx.Length; k++)
-                    {
-                        int nx = x + dx[k];
-                        int ny = y + dy[k];
-                        int z = ny * width + nx;
-
-                        if (nx >= 0 && nx < width && ny >= 0 && ny < width)
+                        int ni = ny * width + nx;
+                        float neighborHeight = heights[ni] + water[ni];
+                        if (neighborHeight < topHeight)
                         {
-                            int neighbor = ny * width + nx;
-                            float waterPassed = Mathf.Min(water[j], (topOfWaterNeighbors[k] / sumOfNeighbors) * water[j]);
-                            float sedimentCapacity = 0f;
-
-                            if (k >= 4)
-                                waterPassed *= 0.7071f;
-
-                            deltaWater[j] -= waterPassed;
-                            deltaWater[neighbor] += waterPassed;
-
-                            float slope = topOfWaterNeighbors[k];
-                            sedimentCapacity = capacity * waterPassed * slope;
-
-                            if (sediment[j] > sedimentCapacity)
-                            {
-                                float deposit = deposition * (sediment[j] - sedimentCapacity);
-                                deltaHeights[j] += deposit;
-                                deltaSediment[j] -= deposit;
-                                deltaSediment[neighbor] += sedimentCapacity;
-                            }
-                            else
-                            {
-                                float soft = softness * (sedimentCapacity - sediment[j]);
-                                deltaHeights[j] -= soft;
-                                deltaSediment[j] -= sediment[j];
-                                deltaSediment[neighbor] += sediment[j] + soft;
-                            }
-
+                            neighbors[count] = ni;
+                            diffs[count] = topHeight - neighborHeight;
+                            totalDiff += diffs[count];
+                            count++;
                         }
                     }
                 }
-                else
+
+                if (count == 0)
                 {
-                    float deposit = deposition * sediment[j];
-                    deltaHeights[j] += deposit;
-                    deltaSediment[j] -= deposit;
+                    float deposit = deposition * sediment[i];
+                    deltaHeights[i] += deposit;
+                    deltaSediment[i] -= deposit;
+                    continue;
                 }
 
+                float totalOutflow = MathF.Min(water[i], totalDiff);
+
+                float cTotal = capacity * totalOutflow;
+
+                float sedimentToMove;
+                float depositAmount = 0f;
+                float erosionAmount = 0f;
+
+                if (sediment[i] > cTotal)
+                {
+                    float deposit = deposition * (sediment[i] - cTotal);
+                    sedimentToMove = cTotal;
+                    deltaHeights[i] += deposit;
+                    deltaSediment[i] -= deposit;
+                }
+                else
+                {
+                    float erosion = softness * (cTotal - sediment[i]);
+                    sedimentToMove = sediment[i] + erosion;
+                    deltaHeights[i] -= erosion;
+                }
+
+                for (int n = 0; n < count; n++)
+                {
+                    int ni = neighbors[n];
+                    float proportion = diffs[n] / totalDiff;
+                    float flow = totalOutflow * proportion;
+
+                    deltaWater[i] -= flow;
+                    deltaWater[ni] += flow;
+
+                    deltaSediment[ni] += sedimentToMove * proportion;
+                }
+
+                deltaHeights[i] += depositAmount;
+                deltaHeights[i] -= erosionAmount;
+                deltaSediment[i] -= sedimentToMove;
             }
-            for (int k = 0; k < heights.Length; k++)
+
+            //---PASS 2---
+            for (int i = 0; i < size; i++)
             {
-                water[k] += deltaWater[k];
-                sediment[k] += deltaSediment[k];
-                heights[k] += deltaHeights[k];
+                water[i] += deltaWater[i];
+                sediment[i] += deltaSediment[i];
+                heights[i] += deltaHeights[i];
+
+                water[i] *= 0.99f;
+
+                if (water[i] < 0f) water[i] = 0f;
+                if (sediment[i] < 0f) sediment[i] = 0f;
             }
 
+            //--------------------BADANIA-----------------------
 
-        }
+        //    int[] steps = { 1, 2, 5, 10, 20, 30, 50, 70, 100, 130, 160, 200 };
 
-        //for(int iter = 0; iter < iterations; iter++)
-        //{
-        //    for (int i = 0; i < heights.Length; i++)
-        //    {
-        //        int x = i % width;
-        //        int y = i / width;
+        //    if (steps.Contains(iter)) {
+        //        float stdDev = Metrics.StdDev(heights);
+        //        float avgGradient = Metrics.MeanGrad(heights, mapSize, 2);
+        //        float varG = Metrics.GradientVariance();
+        //        float ruggedness = Metrics.Ruggedness(heights, mapSize);
+        //        float meanAbsCurvature = Metrics.MeanAbsCurvature(heights, mapSize);
+        //        float skewness = Metrics.HeightSkewness(heights, mapSize);
+        //        float erosionScore = Metrics.ErosionScore(heights, mapSize);
 
-
-        //        int[] dx = { -1, 1, 0, 0 };
-        //        int[] dy = { 0, 0, -1, 1 };
-
-        //        for(int j = 0; j < dx.Length; j++)
+        //        results.Add(new ExperimentResultErosion
         //        {
-        //            int nx = x + dx[j];
-        //            int ny = y + dy[j];
-        //            int neighbor = ny * width + nx;
-
-        //            if (nx >= 0 && nx < width && ny >= 0 && ny < width)
-        //            {
-        //                float deltaWater = Mathf.Min(water[i], (water[i] - heights[i]) - (water[neighbor] - heights[neighbor]));
-
-        //                if (deltaWater <= 0)
-        //                {
-        //                    newHeights[i] = heights[i] + deposition * sediment[i];
-        //                    newSediment[i] = (1 - deposition) * sediment[i];
-        //                }
-        //                else
-        //                {
-        //                    newWater[i] = water[i] - deltaWater;
-        //                    newWater[neighbor] = water[neighbor] + deltaWater;
-        //                    float sedimentCapacity = capacity * deltaWater;
-
-        //                    if (sediment[i] >= sedimentCapacity)
-        //                    {
-        //                        newSediment[neighbor] = sediment[neighbor] + sedimentCapacity;
-        //                        newHeights[i] = heights[i] + deposition * (sediment[i] - sedimentCapacity);
-        //                        newSediment[i] = (1 - deposition) * (sediment[i] - sedimentCapacity);
-        //                    }
-        //                    else
-        //                    {
-        //                        newSediment[neighbor] = sediment[neighbor] + sediment[i] + softness * (sedimentCapacity - sediment[i]);
-        //                        newHeights[i] = heights[i] - softness * (sedimentCapacity - sediment[i]);
-        //                        newSediment[i] = 0;
-        //                    }
-        //                }
-        //            }
-        //        }
-
+        //            iterations = iter,
+        //            stdDev = stdDev,
+        //            avgGradient = avgGradient,
+        //            varGradient = varG,
+        //            ruggedness = ruggedness,
+        //            meanAbsCurvature = meanAbsCurvature,
+        //            skewness = skewness,
+        //            erosionScore = erosionScore,
+        //        });
         //    }
 
-        //    heights = newHeights;
-        //    water = newWater;
-        //    sediment = newSediment;
-        //}
+        //    //-------------------------------------------
+
+        }
+        //string parameterName = "Softness";
+        //Metrics.SaveErosionToCSV(results, "GridErosion/New/gridErosion" + parameterName + softness + ".csv");
 
         return heights;
     }

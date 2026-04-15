@@ -1,0 +1,7 @@
+RulesA-Simple;numberOfSegments;totalRiverLength;numberOfSplits;numberOFSegmentsOnMap;riverLengthOnMap;mapCoverage
+Test1;81;2754;12;81;2754;0,01076091
+Test2;81;2754;15;81;2754;0,01206768
+Test3;81;3240;15;81;3240;0,01659356
+Test4;81;3240;15;81;3240;0,01558161
+Test5;81;1782;17;81;1782;0,007537819
+
